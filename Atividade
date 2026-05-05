@@ -1,0 +1,143 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+// Struct do aluno usando classe
+class Aluno {
+    String nome;
+    double[] notas;
+    double media;
+
+    public Aluno(String nome, double[] notas) {
+        this.nome = nome;
+        this.notas = notas;
+        this.media = calcularMedia();
+    }
+
+    private double calcularMedia() {
+        double soma = 0;
+        for (double nota : notas) {
+            soma += nota;
+        }
+        return soma / notas.length;
+    }
+}
+
+public class GerenciadorNotas {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Leitura do número de alunos
+        int numAlunos = 0;
+        while (numAlunos <= 0) {
+            System.out.print("Digite o número de alunos: ");
+            try {
+                numAlunos = Integer.parseInt(scanner.nextLine().trim());
+                if (numAlunos <= 0) {
+                    System.out.println("O número de alunos deve ser maior que 0.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Entrada inválida. Digite um número inteiro.");
+            }
+        }
+
+        // Lista de alunos (vetor de structs)
+        List<Aluno> turma = new ArrayList<>();
+
+        // Matriz de notas (lista de listas)
+        double[][] matrizNotas = new double[numAlunos][3];
+
+        // Leitura dos dados de cada aluno
+        for (int i = 0; i < numAlunos; i++) {
+            System.out.println("\nAluno " + (i + 1) + ":");
+
+            System.out.print("  Nome do aluno " + (i + 1) + ": ");
+            String nome = scanner.nextLine().trim();
+
+            double[] notas = new double[3];
+            boolean notasValidas = false;
+
+            while (!notasValidas) {
+                System.out.print("  Notas de " + nome + " (3 valores separados por espaço): ");
+                String[] entrada = scanner.nextLine().trim().split("\\s+");
+
+                if (entrada.length != 3) {
+                    System.out.println("  Digite exatamente 3 notas.");
+                    continue;
+                }
+
+                try {
+                    boolean todasValidas = true;
+                    for (int j = 0; j < 3; j++) {
+                        notas[j] = Double.parseDouble(entrada[j]);
+                        if (notas[j] < 0 || notas[j] > 10) {
+                            System.out.println("  As notas devem estar entre 0 e 10.");
+                            todasValidas = false;
+                            break;
+                        }
+                    }
+                    if (todasValidas) {
+                        notasValidas = true;
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("  Entrada inválida. Digite números válidos.");
+                }
+            }
+
+            // Armazena na matriz de notas
+            matrizNotas[i] = notas;
+
+            // Cria o aluno (struct) e adiciona à turma
+            turma.add(new Aluno(nome, notas));
+        }
+
+        // Exibição dos resultados
+        System.out.println("\n--- RESULTADOS ---");
+        for (Aluno aluno : turma) {
+            System.out.printf("%s - Média: %.2f%n", aluno.nome, aluno.media);
+        }
+
+        // Encontra o aluno com maior média
+        Aluno melhorAluno = turma.get(0);
+        for (Aluno aluno : turma) {
+            if (aluno.media > melhorAluno.media) {
+                melhorAluno = aluno;
+            }
+        }
+
+        System.out.printf("%nMaior média da turma: %.2f%n", melhorAluno.media);
+        System.out.println("Aluno: " + melhorAluno.nome);
+
+        // Desafio extra: busca por nome
+        System.out.println("\n--- BUSCA POR ALUNO ---");
+        while (true) {
+            System.out.print("\nDigite o nome do aluno para buscar (ou 'sair' para encerrar): ");
+            String busca = scanner.nextLine().trim();
+
+            if (busca.equalsIgnoreCase("sair")) {
+                break;
+            }
+
+            Aluno encontrado = null;
+            for (Aluno aluno : turma) {
+                if (aluno.nome.equalsIgnoreCase(busca)) {
+                    encontrado = aluno;
+                    break;
+                }
+            }
+
+            if (encontrado != null) {
+                System.out.println("\nAluno encontrado: " + encontrado.nome);
+                System.out.printf("  Notas: [%.1f, %.1f, %.1f]%n",
+                        encontrado.notas[0], encontrado.notas[1], encontrado.notas[2]);
+                System.out.printf("  Média: %.2f%n", encontrado.media);
+            } else {
+                System.out.println("Aluno não encontrado.");
+            }
+        }
+
+        System.out.println("\nPrograma encerrado.");
+        scanner.close();
+    }
+}
